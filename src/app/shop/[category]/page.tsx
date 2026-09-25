@@ -44,10 +44,15 @@ export default async function CategoryPage({
   const category = await getCategory(params.category);
   if (!category) notFound();
 
-  const products = await prisma.product.findMany({
-    where: { categoryId: category.id, inStock: true },
-    orderBy: { createdAt: "desc" },
-  });
+  let products: any[] = [];
+  try {
+    products = await prisma.product.findMany({
+      where: { categoryId: category.id, inStock: true },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (err) {
+    console.error("CategoryPage query error:", err);
+  }
 
   return (
     <div className="container-site py-10">

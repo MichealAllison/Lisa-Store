@@ -12,14 +12,23 @@ export const metadata: Metadata = {
 };
 
 export default async function ShopPage() {
-  const [products, categories] = await Promise.all([
-    prisma.product.findMany({
-      where: { inStock: true },
-      orderBy: { createdAt: "desc" },
-      include: { category: true },
-    }),
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
-  ]);
+  let products: any[] = [];
+  let categories: any[] = [];
+
+  try {
+    const [productsData, categoriesData] = await Promise.all([
+      prisma.product.findMany({
+        where: { inStock: true },
+        orderBy: { createdAt: "desc" },
+        include: { category: true },
+      }),
+      prisma.category.findMany({ orderBy: { name: "asc" } }),
+    ]);
+    products = productsData;
+    categories = categoriesData;
+  } catch (err) {
+    console.error("ShopPage query error:", err);
+  }
 
   return (
     <div className="container-site py-10">

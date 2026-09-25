@@ -8,19 +8,28 @@ import Link from "next/link";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [featured, latest, settings] = await Promise.all([
-    prisma.product.findMany({
-      where: { isNew: true, inStock: true },
-      orderBy: { createdAt: "desc" },
-      take: 4,
-    }),
-    prisma.product.findMany({
-      where: { inStock: true },
-      orderBy: { createdAt: "desc" },
-      take: 8,
-    }),
-    getSettings(),
-  ]);
+  let featured: any[] = [];
+  let latest: any[] = [];
+  let settings = await getSettings();
+
+  try {
+    const [featuredData, latestData] = await Promise.all([
+      prisma.product.findMany({
+        where: { isNew: true, inStock: true },
+        orderBy: { createdAt: "desc" },
+        take: 4,
+      }),
+      prisma.product.findMany({
+        where: { inStock: true },
+        orderBy: { createdAt: "desc" },
+        take: 8,
+      }),
+    ]);
+    featured = featuredData;
+    latest = latestData;
+  } catch (err) {
+    console.error("HomePage query error:", err);
+  }
 
   const whatsappChatUrl = settings.whatsappNumber
     ? buildWhatsAppUrl(
